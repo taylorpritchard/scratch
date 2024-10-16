@@ -1,0 +1,263 @@
+#!/bin/bash
+#===============================================================
+#
+# PERSONAL $HOME/.bashrc FILE for bash-2.04 (or later)
+#
+# This file is read (normally) by interactive shells only.
+# Here is the place to define your aliases, functions and
+# other interactive features like your prompt.
+#
+#===============================================================
+
+#-----------------------------------------
+# Detect if system is Linux or AIX
+#-----------------------------------------
+TARGET=$(uname -s)
+
+#limit core dump size to 0
+ulimit -c 0
+
+#-----------------------------------------
+# Source global definitions (if any)
+#-----------------------------------------
+# only run if we have an interactive shell
+if [ $(expr index "$-" i) -eq 0 ]; then
+   return
+fi
+
+if [ -f /etc/bashrc ]; then
+        . /etc/bashrc  # Read system bash init file, if exists.
+fi
+
+#----------------------------------------------------------------
+# Some settings.  For more info type the comand: help set
+#----------------------------------------------------------------
+set -o notify
+set -o noclobber
+#set -o nounset
+set -o emacs
+set -o ignoreeof
+shopt -s cdspell
+shopt -s cdable_vars
+shopt -s checkhash
+shopt -s checkwinsize
+shopt -s mailwarn
+shopt -s sourcepath
+shopt -s no_empty_cmd_completion
+shopt -s histappend histreedit
+shopt -s extglob        # useful for programmable completion
+
+#----------------------------------------------------------------
+# Colors for prompt, greeting, motd etc...
+#----------------------------------------------------------------
+   # Reset
+  Color_Off='\e[0m'       # Text Reset
+   # Regular Colors
+  Black='\e[0;30m'        # Black
+  Red='\e[0;31m'          # Red
+  Green='\e[0;32m'        # Green
+  Yellow='\e[0;33m'       # Yellow
+  Blue='\e[0;34m'         # Blue
+  Purple='\e[0;35m'       # Purple
+  Cyan='\e[0;36m'         # Cyan
+  White='\e[0;37m'        # White
+   # Bold
+  BBlack='\e[1;30m'       # Black
+  BRed='\e[1;31m'         # Red
+  BGreen='\e[1;32m'       # Green
+  BYellow='\e[1;33m'      # Yellow
+  BBlue='\e[1;34m'        # Blue
+  BPurple='\e[1;35m'      # Purple
+  BCyan='\e[1;36m'        # Cyan
+  BWhite='\e[1;37m'       # White
+   # Underline
+  UBlack='\e[4;30m'       # Black
+  URed='\e[4;31m'         # Red
+  UGreen='\e[4;32m'       # Green
+  UYellow='\e[4;33m'      # Yellow
+  UBlue='\e[4;34m'        # Blue
+  UPurple='\e[4;35m'      # Purple
+  UCyan='\e[4;36m'        # Cyan
+  UWhite='\e[4;37m'       # White
+   # Background
+  On_Black='\e[40m'       # Black
+  On_Red='\e[41m'         # Red
+  On_Green='\e[42m'       # Green
+  On_Yellow='\e[43m'      # Yellow
+  On_Blue='\e[44m'        # Blue
+  On_Purple='\e[45m'      # Purple
+  On_Cyan='\e[46m'        # Cyan
+  On_White='\e[47m'       # White
+   # High Intensity
+  IBlack='\e[0;90m'       # Black
+  IRed='\e[0;91m'         # Red
+  IGreen='\e[0;92m'       # Green
+  IYellow='\e[0;93m'      # Yellow
+  IBlue='\e[0;94m'        # Blue
+  IPurple='\e[0;95m'      # Purple
+  ICyan='\e[0;96m'        # Cyan
+  IWhite='\e[0;97m'       # White
+   # Bold High Intensity
+  BIBlack='\e[1;90m'      # Black
+  BIRed='\e[1;91m'        # Red
+  BIGreen='\e[1;92m'      # Green
+  BIYellow='\e[1;93m'     # Yellow
+  BIBlue='\e[1;94m'       # Blue
+  BIPurple='\e[1;95m'     # Purple
+  BICyan='\e[1;96m'       # Cyan
+  BIWhite='\e[1;97m'      # White
+   # High Intensity backgrounds
+  On_IBlack='\e[0;100m'   # Black
+  On_IRed='\e[0;101m'     # Red
+  On_IGreen='\e[0;102m'   # Green
+  On_IYellow='\e[0;103m'  # Yellow
+  On_IBlue='\e[0;104m'    # Blue
+  On_IPurple='\e[10;95m'  # Purple
+  On_ICyan='\e[0;106m'    # Cyan
+  On_IWhite='\e[0;107m'   # White
+
+
+#-------------------------------------------------------------------------------
+# Greeting
+#-------------------------------------------------------------------------------
+echo -e "================================================================================"
+echo -e " This is BASH ${BASH_VERSION%.*} on $DISPLAY"
+echo -e "================================================================================"
+function _exit        # function to run upon exit of shell
+{
+    echo -e "Have a nice day!"
+}
+trap _exit 0
+
+#===============================================================================
+# Shell Prompt
+#===============================================================================
+ 
+export PS1="\[${BIBlue}\][\w]>\[${Color_Off}\] "
+export PS2="\[${BIBlue}\]>\[${Color_Off}\] "
+
+parse_git_branch() {
+  git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
+}
+
+update_ps1() {
+  export PS1="\[${BIBlue}\][\w]>\[${BIGreen}\]$(parse_git_branch)\[${Color_Off}\] "   
+}
+ 
+if [ -z ${CTEUSER+x} ]; then
+   ## DEFAULT ##PROMPT_COMMAND='printf "\033]0;%s@%s:%s\007" "${USER}" "${HOSTNAME%%.*}" "${PWD/#$HOME/~}"'
+   ## If I'm not in a CTE environment, show host and path
+   export PROMPT_COMMAND='update_ps1 && printf "\033]0;%s:%s\007" "${HOSTNAME%.*}" "${PWD/#$HOME/~}"'
+#else export PROMPT_COMMAND='printf "\033]0;%s%s:%s\007" "${CTEPROJNAME}" "${CTECHIPID}" "${PWD/#$CTEPROJPATH/~}"'
+else export PROMPT_COMMAND='update_ps1 && printf "\033]0;%s%s:%s\007" "${CTEPROJNAME}" "${CTECHIPID}" "${PWD/#$CTEUSRHOME/~}"'
+fi
+
+PATH="~/bin/:/opt/xsite/cte/tools/zhwdevops/cmakertx/:/opt/xsite/cte/tools/python/3/bin/:/opt/xsite/cte/tools/git/latest/bin/:/opt/xsite/cte/tools/git/hub/bin:${CTEPROJPATH}/verif/ztscripts/common/:$PATH:."
+export PATH
+
+# GHE Setup
+
+source /opt/xsite/cte/tools/git/github-sh/github-sh.plugin.bash
+
+#PYTHONPATH="$PYTHONPATH:~/lib/python/"
+#export PYTHONPATH
+
+#===============================================================================
+# Simvision Setup
+#===============================================================================
+source ~/.ncwrap.new
+
+#===============================================================================
+# ALIASES AND FUNCTIONS
+#===============================================================================
+eval `dircolors ~/.dir_colors`
+if [ "$TARGET" = "Linux" ]; then
+   alias  ls="ls -FX --color --group-directories-first"
+   alias  la="ls -FaX --color --group-directories-first"
+   alias  ll="ls -Fltr --color --group-directories-first"
+   alias  lsd="ls -dX --color */"
+else
+   alias  ls="/opt/freeware/bin/ls -F --color"       # Display file types with color
+   alias  la="/opt/freeware/bin/ls -Fa --color"      # Display hidden files.
+   alias  ll="/opt/freeware/bin/ls -Fltr --color"   # Long list, sort by time.
+   alias  lsd="/opt/freeware/bin/ls -d --color */"   # list directories
+fi
+
+cdksh() { if [ $# = 2 ]; then builtin cd ${PWD/$1/$2}; else builtin cd $*; fi; }
+alias cd="cdksh"
+
+notify() { eval $* ; notify-send 'Task Complete' "> $*"; }
+
+alias b='cd -'
+alias home='cd ~'
+
+alias  untar="tar -xvf"
+alias  cl="clear&&ls"                # clears and list
+alias  path='echo -e ${PATH//:/\\n}' # print the path line by line
+alias  which='type -all'             # show alias or location in path of a command
+alias  h='history'
+alias  ..='cd ..'
+alias  l='ls';
+alias  dirsize='du -smh *';
+alias  ps='ps -uxc --forest'         # show running processes in tree format
+
+#---> Prevents accidentally clobbering files.
+alias   rm='rm -i'
+alias   cp='cp -i'
+alias   mv='mv -i'
+#---> Prevents accidentally clobbering files.
+
+alias  more='less'
+export PAGER=less
+export LESSCHARSET='latin1'
+
+#alias klog='klog && klog -c bb'
+
+#--- Programs ------------------------------------------------------------------
+alias e='vim'
+alias tvim='/usr/bin/vim'
+alias vim='gvim'         # show running processes in tree format
+alias ge='gedit&'
+alias dr9='/afs/apd/func/vlsi/eclipz/c14/usr/mthuffer/zcdd1/dr9/dr9'
+alias run_gen_trace='/afs/apd/func/vlsi/eclipz/c14/usr/tjpritch/zcdd1/bin/run_gen_trace'
+alias genchkfig='perl /afs/apd/func/vlsi/eclipz/mpgcommon/tools/bin/genchkfig'
+alias zmmb='$CTEPROJPATH/verif/scripts/common/zmmb.pl'
+alias zrun='$CTEPROJPATH/verif/ztscripts/common/zrun'
+alias simvision='simvision -64BIT'
+alias mantis='cteMantis -bits64 -a *.aet -wave *.io && vim *.trace'
+alias eclipse='/afs/apd/func/vlsi/eclipz/mpg/usr/vkapadia/eclipse/eclipse&'
+alias xclip='/loctools/bin/xclipboard'
+alias tkdiff='/afs/apd/func/vlsi/cte/tools/bin/tkdiff'
+alias tiger='$CTEPATH/tools/tiger/latest/scripts/run_tiger.pl'
+alias lsfjobs='/afs/apd/func/vlsi/eclipz/c22/tools/timing/common_z_timing/beta/bin/lsfjobs';
+alias vltr='run.ngvltr &'
+
+#--- GIT Shortcuts -------------------------------------------------------------
+alias git='/opt/xsite/cte/tools/git/latest/bin/git'
+alias tig='/opt/xsite/cte/tools/git/latest/bin/tig'
+alias gitk='/opt/xsite/cte/tools/git/latest/bin/gitk'
+alias zgit='/opt/xsite/cte/tools/git/latest/bin/git sm'
+
+#--- SVN Shortcuts -------------------------------------------------------------
+alias svn='logicSvn'
+alias update='logicSvn update'
+alias status='logicSvn status'
+alias commit='logicSvn commit -m'
+
+#--- Regression Scripts---------------------------------------------------------
+alias regress='ksh /afs/apd/func/vlsi/eclipz/c14/usr/tjpritch/zchp2/idu_zchp2/run/regress tjpritch_1 old'
+alias cbusregress='ksh /afs/apd/func/vlsi/eclipz/c14/usr/tjpritch/zchp2/idu_zchp2/run/cbusregress tjpritch_1 old'
+alias regStatus='python /afs/apd/func/vlsi/eclipz/c14/usr/tjpritch/zchp2/idu_zchp2/regChecker.py tjpritch_1'
+alias regKill='bkill -J *tjpritch_1*'
+alias checkreg='ksh /afs/apd/func/vlsi/eclipz/c14/usr/tjpritch/zchp2/idu_zchp2/run/checkreg'
+
+#--- Custom Shortcuts ----------------------------------------------------------
+alias checkout='~/checkout'
+alias va='~/process_virtual_address'
+alias cte='ctezadd1' #'/afs/apd/func/vlsi/eclipz/common/tools/bin/c14zcth1win -shell /bin/bash -xterm xterm'
+alias ctehome='cd $CTEUSRHOME'
+alias cteproj='cd $CTEPROJPATH'
+
+#--- Bash Shortcuts ------------------------------------------------------------
+alias sbash='source ~/.bashrc'
+alias ebash='vim ~/.bashrc'                                                                                       

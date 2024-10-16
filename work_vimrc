@@ -1,0 +1,108 @@
+set mouse=a
+set t_Co=256
+set background=dark
+syntax on
+set number
+set nowrap
+set ignorecase
+set colorcolumn=81
+
+filetype on
+au BufNewFile,BufRead *.bil set filetype=svhdl
+au BufNewFile,BufRead *.svhdl set filetype=svhdl
+au BufNewFile,BufRead *.vhdl set filetype=svhdl
+au BufNewFile,BufRead *.vhd   set filetype=svhdl
+au BufNewFile,BufRead *.trace set filetype=trace
+au BufNewFile,BufRead *.reset set filetype=c
+au BufNewFile,BufRead *.parms set filetype=c
+
+set laststatus=2
+
+" turn off error beeps/flashes
+
+set vb
+set t_vb=
+
+" tabs to spaces
+
+set tabstop=2
+set shiftwidth=2
+set expandtab
+
+" edit past line ending
+
+set ve=all
+
+" commands for opening files
+" (nmode) O - open svhdl file by macro name
+" (nmode) V - open vhdl file by macro name
+" (nmode) J - open jcr svhdl file by macro name
+" (vmode) O - open highlighted file path
+
+nnoremap O yiw :e <C-r>".svhdl<CR>
+nnoremap V yiw :e <C-r>".vhdl<CR>
+nnoremap J yiw :e ../../jcr/src/<C-r>".svhdl<CR>
+vnoremap O y :e <C-r>"<CR>
+
+" search shortcuts
+" e - search forward for selection
+" E - search backward for selection
+
+nnoremap e *
+nnoremap E #
+vnoremap e y /<C-r>"<CR>
+vnoremap E y ?<C-r>"<CR>
+"nnoremap * yiw /\(\(<C-r>"\([^;]*\(<=\\|:=\)\)\@=\)\\|\(\(^\s*PINI\s*\)\@<=<C-r>"\)\)<CR>
+nnoremap * yiw /\(\(\<<C-r>"\>\([^;]*\(<=\\|:=\)\)\@=\)\\|\(\(^\s*PINI\s*\)\@<=\<<C-r>"\>\)\)<CR>
+"vnoremap * y /\(\(<C-r>"\([^;]*\(<=\\|:=\)\)\@=\)\\|\(\(^\s*PINI\s*\)\@<=<C-r>"\)\)<CR>
+vnoremap * y /\(\(<C-r>"\([^;]*\(<=\\|:=\)\)\@=\)\\|\(\(^\s*PINI\s.*\)\@<=<C-r>"\)\)<CR>
+
+" cursor shortcuts, shift+arrow to move faster
+
+noremap <s-Up>    10<Up>
+noremap <s-Down>  10<Down>
+noremap <s-Left>  10<Left>
+noremap <s-Right> 10<Right>
+
+inoremap <s-Up>    <Up><Up><Up><Up><Up>
+inoremap <s-Down>  <Down><Down><Down><Down><Down>
+inoremap <s-Left>  <Left><Left><Left><Left><Left>
+inoremap <s-Right> <Right><Right><Right><Right><Right>
+
+" buffer shortcuts
+" Tab - next buffer
+" shift-Tab - prev buffer (gvim only)
+" Q - close buffer
+
+nnoremap <Tab> :bn<CR>
+nnoremap <s-Tab> :bp<CR>
+nnoremap Q :bw<CR>
+
+" save buffer edit status
+
+set hidden
+
+" save buffer cursor position
+
+if v:version >= 700
+  au BufLeave * let b:winview = winsaveview()
+  au BufEnter * if( exists('b:winview') ) | call winrestview(b:winview) | endif
+endif
+
+" use Tab in vmode to align lines by whitespace
+
+vnoremap <Tab> :Tab /\S\+<CR>
+
+" space to toggle folds
+
+nnoremap <space> za
+
+" plugin stuff
+
+execute pathogen#infect()
+
+let g:airline#extensions#tabline#enabled = 1
+
+colorscheme custom
+
+let g:airline_theme='understated'                            
